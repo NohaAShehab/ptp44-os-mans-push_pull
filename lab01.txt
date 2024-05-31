@@ -1,0 +1,4 @@
+1- implement search box using xhr on any project you worked on before
+2- ajax registeration form using jquery ajax
+3- implement delete item from table/ grid using ajax
+4- try long-polling to get data from file using any server but not php
