@@ -38,9 +38,9 @@ load_btn.addEventListener('click', function () {
     };
 
 });
-
+myxhr.open('GET', 'mycv.tx');
 mycv.addEventListener('click', function () {
-    myxhr.open('GET', 'mycv.txt');
+
     myxhr.send();
     myxhr.onreadystatechange = function () {
         if (myxhr.status === 200 && myxhr.readyState===4) {
@@ -48,6 +48,11 @@ mycv.addEventListener('click', function () {
         }
     }
 });
+
+myxhr.onerror= function () {
+    console.log("Error ");
+};
+
 
 
 
