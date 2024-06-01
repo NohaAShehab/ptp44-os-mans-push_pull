@@ -10,7 +10,7 @@ var msg_input = document.getElementById('msg')
 var send_btn = document.getElementById('send')
 
 
-mywebsocket = new WebSocket('ws://localhost:8080')
+mywebsocket = new WebSocket('ws://localhost:8090')
 
 console.log(mywebsocket);
 // open the connection
@@ -31,7 +31,7 @@ mywebsocket.onopen=function (){
 mywebsocket.onmessage= function (event){
     console.log(event.data)
     msg_content = JSON.parse(event.data)
-    chatbox.innerHTML +=`<h4 class="text-center"> ${msg_content.body} </h4>`
+    chatbox.innerHTML +=`<h4 > ${msg_content.message} </h4>`
 }
 
 // on error on connecting to server
@@ -47,7 +47,7 @@ send_btn.addEventListener('click', function (){
         body: `${username}:${msg_val}`
     }
     mywebsocket.send(JSON.stringify(message_obj));
-    msg_val = '';
+    msg_input.value = '';
 });
 /// on close
 

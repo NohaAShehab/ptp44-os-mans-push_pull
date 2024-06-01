@@ -8,7 +8,7 @@ class ChatServer(WebSocket):
     def prepare_message(messageobj: str):
         data = {}
         received_data = json.loads(messageobj)
-        if 'username' in received_data:
+        if 'login' in received_data and 'username' in received_data:
             username = received_data['username']
             msg_to_send = f'{username} has been joined'
             data = {'username': username, 'message': msg_to_send}
@@ -18,24 +18,31 @@ class ChatServer(WebSocket):
 
         return data
     # this function will be called if server receives a message
+
+    @classmethod
+    def send_to_all_clients(cls, message: str):
+        for client in cls.clients:
+            client.send_message(message)
+
     def handle(self):
         """
           Called when websocket frame is received.
           To access the frame data call self.data."""
         print(f"data: {self.data}")
-        received_data= json.loads(self.data)
-        if 'username' in received_data:
-            self.username = received_data['username']
-        else:
-            self.username = 'Anonymous'
+        message_data = ChatServer.prepare_message(self.data)
+        print("message_data",message_data)
+        if 'username' in message_data:
+            self.username = message_data.pop('username')
 
-        print(list(map(lambda x:x.username, ChatServer.clients)))
-        # once I received a message --> broadcasting to all users
+        ChatServer.send_to_all_clients(json.dumps(message_data))
 
-        msg_to_send = {'body':f'{self.username} joined the chat' }
-        msg = json.dumps(msg_to_send)
-        for client in ChatServer.clients:
-            client.send_message(msg)
+
+
+
+
+
+        # for client in ChatServer.clients:
+        #     client.send_message(msg)
 
 
     def connected(self):
@@ -57,6 +64,6 @@ class ChatServer(WebSocket):
 
 
 if __name__ == '__main__':
-    server = WebSocketServer('', 8080,ChatServer)
+    server = WebSocketServer('', 8090,ChatServer)
     print("---server started")
     server.serve_forever()
