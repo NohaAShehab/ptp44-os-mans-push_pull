@@ -19,18 +19,36 @@ mywebsocket.onopen=function (){
     // while sending data from client to server
     // send data in form of object
     message_obj = {
-        username : username
+        username : username,
+        login: true
     }
     // send message
     this.send(JSON.stringify(message_obj))
 }
 
 
+/// what will I do when I receive message
+mywebsocket.onmessage= function (event){
+    console.log(event.data)
+    msg_content = JSON.parse(event.data)
+    chatbox.innerHTML +=`<h4 class="text-center"> ${msg_content.body} </h4>`
+}
+
 // on error on connecting to server
 mywebsocket.onerror=function (){
     chatbox.innerHTML += '<h3 style="color: red">Error connecting to server </h3>'
 }
 
+
+// send message
+send_btn.addEventListener('click', function (){
+    msg_val = msg_input.value;
+    message_obj = {
+        body: `${username}:${msg_val}`
+    }
+    mywebsocket.send(JSON.stringify(message_obj));
+    msg_val = '';
+});
 /// on close
 
 
