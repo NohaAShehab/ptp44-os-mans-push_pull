@@ -2,8 +2,13 @@ from simple_websocket_server import WebSocket, WebSocketServer
 
 import json
 class ChatServer(WebSocket):
+    user_ids = 0
     clients= []
 
+    @property
+    def onlineusers(self):
+        online = list(map(lambda c:c.username, self.__class__.clients))
+        return online
     @staticmethod
     def prepare_message(messageobj: str):
         data = {}
@@ -11,18 +16,20 @@ class ChatServer(WebSocket):
         if 'login' in received_data and 'username' in received_data:
             username = received_data['username']
             msg_to_send = f'{username} has been joined'
-            data = {'username': username, 'message': msg_to_send}
+            data = {'username': username, 'message': msg_to_send,
+                    'type':'login'}
 
         elif 'body' in received_data:
-            data = {'message': received_data['body']}
+            data = {'message': received_data['body'], 'type':'chat'}
 
         return data
     # this function will be called if server receives a message
 
     @classmethod
-    def send_to_all_clients(cls, message: str):
+    def send_to_all_clients(cls, message: str, exculude_client):
         for client in cls.clients:
-            client.send_message(message)
+            if client != exculude_client:
+                client.send_message(message)
 
     def handle(self):
         """
@@ -33,8 +40,11 @@ class ChatServer(WebSocket):
         print("message_data",message_data)
         if 'username' in message_data:
             self.username = message_data.pop('username')
+            self.send_message(json.dumps({'online': self.onlineusers}))
 
-        ChatServer.send_to_all_clients(json.dumps(message_data))
+        message_data['online'] =self.onlineusers
+        print(message_data)
+        ChatServer.send_to_all_clients(json.dumps(message_data), self)
 
 
 
@@ -49,18 +59,22 @@ class ChatServer(WebSocket):
         """
           Called when a websocket client connects to the server.
         """
-        # print(f"---- client connected --> {self}")
+        ChatServer.user_ids += 1
+        self.id = ChatServer.user_ids
         ChatServer.clients.append(self)
-        print(f"clients: {ChatServer.clients}")
-        # for c in ChatServer.clients:
-        #     print('username' in c.__dict__)
+
+
 
 
 
 
     def handle_close(self):
-        print(self.address, 'closed')
         ChatServer.clients.remove(self)
+        # send message to all users that user has leaved
+        msg_to_send = f'{self.username} has been disconnected'
+        data = {'type':'logout','message': msg_to_send,
+                'online': self.onlineusers}
+        ChatServer.send_to_all_clients(json.dumps(data), self)
 
 
 if __name__ == '__main__':

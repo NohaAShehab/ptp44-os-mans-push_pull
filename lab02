@@ -1,0 +1,14 @@
+option01||
+
+    implement chat application using websockets (display online users)
+    using other technology (node , php )
+
+
+option02 ||
+    continue on the chatserver using python -- and implement
+       private chat rooms ??
+       [ahmed, mohamed, ali]
+        ahmed and mohamed --> can have their private room
+        --> can communicate with the group
+
+--> Don't use chatgpt and google gemini
